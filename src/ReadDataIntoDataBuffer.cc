@@ -1,10 +1,11 @@
 /*
- *  $Id: ReadDataIntoDataBuffer.cc, 2014-08-14 21:33:07 DAMPE $
+ *  $Id: ReadDataIntoDataBuffer.cc, 2014-08-17 21:10:58 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 08/08/2014
 */
 
 #include "DmpRdcAlgBT2012.h"
+#include "DmpEDetectorID.h"
 #include "DmpCore.h"
 
 bool DmpRdcAlgBT2012::ReadDataIntoDataBuffer(){
@@ -33,7 +34,7 @@ bool DmpRdcAlgBT2012::ReadDataIntoDataBuffer(){
     fHeaderBuf.push_back(newEvt);
     std::vector<_FeeData>  aBgoEvt;
     fBgoBuf.push_back(aBgoEvt);
-    for(short i=0;i<KTotalFeeNo;++i){
+    for(short i=0;i<fTotalFeeNo;++i){
       unsigned short feeHeader = 0;
       fFile.read((char*)(&feeHeader),2);
       if(0xeb90 == htobe16(feeHeader)){
@@ -44,6 +45,7 @@ bool DmpRdcAlgBT2012::ReadDataIntoDataBuffer(){
         fFile.read(&runMode_feeID,1);
         short feeID = runMode_feeID&0x3f;   // &0011 1111
         short runMode = runMode_feeID>>6;
+        short detectorID = (runMode_feeID>>4)&0x03;
         unsigned short dataLength;        // 2 bytes
         fFile.read((char*)(&dataLength),2);
         dataLength= htobe16(dataLength);
@@ -51,15 +53,17 @@ bool DmpRdcAlgBT2012::ReadDataIntoDataBuffer(){
           char data[dataLength-2];  // NOTE: 2 bytes of data length itself
           fFile.read(data,dataLength-2);
           _FeeData newFee(data,dataLength-2,feeID,runMode,(short)(unsigned char)feeTrigger);
-          if(kFeeTypeBgo == (runMode_feeID&0x30)){
+          if(DmpEDetectorID::kBgo == detectorID){
             DmpLogInfo<<" Fee type [Bgo] "<<std::hex<<feeID<<" mode "<<runMode<<std::dec<<DmpLogEndl;
             fBgoBuf[fBgoBuf.size()-1].push_back(newFee);
-          }else if(kFeeTypePsd == (runMode_feeID&0x30)){
+          }else if(DmpEDetectorID::kPsd == detectorID){
             DmpLogInfo<<" Fee type [Psd] "<<std::hex<<feeID<<" mode "<<runMode<<std::dec<<DmpLogEndl;
             //fPsdBuf[fPsdBuf.size()-1].push_back(newFee);
-          }else if(kFeeTypeNud == (runMode_feeID&0x30)){
+          }else if(DmpEDetectorID::kNud == detectorID){
             DmpLogInfo<<" Fee type [Nud] "<<std::hex<<feeID<<" mode "<<runMode<<std::dec<<DmpLogEndl;
             //fNudBuf[fNudBuf.size()-1].push_back(newFee);
+          }else if(DmpEDetectorID::kStk == detectorID){
+            DmpLogInfo<<" Fee type [Stk] "<<std::hex<<feeID<<" mode "<<runMode<<std::dec<<DmpLogEndl;
           }else{
             DmpLogWarning<<" Fee type error.. "<<(short)(runMode_feeID&0x30)<<DmpLogEndl;
           }

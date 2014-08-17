@@ -114,17 +114,14 @@ bool DmpRdcAlgBT2012::ProcessThisEventBgo(){
   fEvtHeader->SetRunMode(DmpDetectorID::kBgo,runModes);
 //-------------------------------------------------------------------
 */
-  /*
   fEvtBgo->Reset();
   short nFee = fBgoBuf[0].size();
-// *
-// *  TODO: liu dong do works 
-// *
+  /*
   //for(short i=0;i<nFee;;++i){
   //  fEvtBgo->SetFeeNavigator(fBgoBuf[0][i].Navigator);
   //}
-  fEvtBgo->GenerateStatus();
   */
+  //fEvtBgo->GenerateStatus();
   fBgoBuf.erase(fBgoBuf.begin());
   return true;
 }

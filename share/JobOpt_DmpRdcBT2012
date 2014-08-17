@@ -28,7 +28,7 @@ DMPSW.RootIOSvc.Set("OutData/WriteList","Event/Rdc/EventHeader;Event/Rdc/Bgo")  
 #-------------------------------------------------------------------
 # Creat user's service or algorithm
 rdcAlgBT = DmpRdcAlg.DmpRdcAlgBT2012()
-rdcAlgBT.Set("PackageNumber","3000")
+rdcAlgBT.Set("PackageNumber","30")
 #rdcAlgBT.Set("Psd/Connector","Psd/EM")
 #rdcAlgBT.Set("Stk/Connector",Stk/EM")
 rdcAlgBT.Set("Bgo/Connector","Bgo/EM")

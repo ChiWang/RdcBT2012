@@ -1,5 +1,5 @@
 /*
- *  $Id: DmpRdcAlgBT2012.h, 2014-08-15 23:57:33 DAMPE $
+ *  $Id: DmpRdcAlgBT2012.h, 2014-08-17 20:53:59 DAMPE $
  *  Author(s):
  *    Chi WANG (chiwang@mail.ustc.edu.cn) 27/05/2014
 */
@@ -12,9 +12,6 @@
 
 #include "DmpFeeNavig.h"
 #include "DmpVAlg.h"
-
-class DmpEvtRawBgo;
-class DmpEvtHeader;
 
 //-------------------------------------------------------------------
 struct _HeaderNavig{
@@ -58,6 +55,9 @@ struct _FeeData{
 };
 
 //-------------------------------------------------------------------
+class DmpEvtRawBgo;
+class DmpEvtHeader;
+
 class DmpRdcAlgBT2012 : public DmpVAlg{
 /*
  *  DmpRdcAlgBT2012
@@ -77,18 +77,6 @@ public:
   std::string GetInputPath()const{return fInDataName.stem().string();}
 
 private:    // for all
-  enum EFeeNumber{
-    kFeeNoPsd = 1,
-    kFeeNoBgo = 6,
-    kFeeNoNud = 1,
-    KTotalFeeNo = kFeeNoPsd+kFeeNoBgo+kFeeNoNud
-  };
-  enum EFeeType{
-   kFeeTypeBgo = 0x10,
-   kFeeTypePsd = 0x20,
-   kFeeTypeNud = 0x30,
-  };
-
   bool ReadDataIntoDataBuffer();
   bool fOneEventReady;
   /* 
@@ -97,29 +85,29 @@ private:    // for all
    *        1.2     throw one 0xe2250813 into Exception()
    *    2. retrun false:
    *        reach the end of input file stream
-   *
    */
   bool CheckE2250813DataLength(const int &nBytes);
   bool CheckEb90DataLength(const int &nBytes);
-
   void Exception(const int &b);     // throw whole data of e2250813 into fOutError
+
   boost::filesystem::path   fInDataName;    // input data name
+  short             fTotalFeeNo;    //
   std::ifstream     fFile;          // in data stream
   std::ofstream     fOutError;      // save error datas into Error_fInDataName
   long              fMaxPkgNo;      // read how many 0xe2250813?
   long              fCurrentPkgID;  // current package id
   std::vector<_HeaderNavig> fHeaderBuf;
   std::vector<std::vector<_FeeData> >    fBgoBuf;
-  //std::vector<_FeeData*>    fPsdBuf;
-  //std::vector<_FeeData*>    fNudBuf;
+  //std::vector<std::vector<_FeeData> >    fPsdBuf;
+  //std::vector<_FeeData>     fNudBuf;
 
 private:
   DmpEvtHeader      *fEvtHeader;    // save me
-  char              *fTmpTime;      //
   bool ProcessThisEventHeader();    // convert event header
   void PrintTime()const;
 
 private:    // Bgo
+  short             fFeeNoBgo;      // = 6,
   std::string       fCNCTPathBgo;   // connector path
   std::map<short,short> fMapBgo;        // map of Bgo connector
 
@@ -128,9 +116,16 @@ private:    // Bgo
   bool ProcessThisEventBgo();
 
 private:    // Psd
+  short             fFeeNoPsd;      // = 1,
+  std::string       fCNCTPathPsd;   // connector path
 
 private:    // Nud
+  short             fFeeNoNud;      // = 1,
+  std::string       fCNCTPathNud;   // connector path
 
+private:    // Stk
+  short             fFeeNoStk;      // = 6,
+  std::string       fCNCTPathStk;   // connector path
 };
 
 #endif

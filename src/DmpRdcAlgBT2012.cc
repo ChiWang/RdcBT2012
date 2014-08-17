@@ -11,25 +11,22 @@
 
 //-------------------------------------------------------------------
 DmpRdcAlgBT2012::DmpRdcAlgBT2012()
- :DmpVAlg("Rdc/BT2012"),fInDataName("NO"),fMaxPkgNo(-1),fCurrentPkgID(0),fEvtHeader(0),fTmpTime(0),
-  fCNCTPathBgo("NO"),fEvtBgo(0)
+ :DmpVAlg("Rdc/BT2012"),fInDataName("NO"),fMaxPkgNo(-1),fCurrentPkgID(0),fEvtHeader(0),
+  fFeeNoBgo(6),fCNCTPathBgo("NO"),fEvtBgo(0),
+  fFeeNoPsd(1),fCNCTPathPsd("NO"),
+  fFeeNoNud(1),fCNCTPathNud("NO"),
+  fFeeNoStk(1),fCNCTPathStk("NO")
 {
-  fTmpTime = new char[8];
   OptMap.insert(std::make_pair("BinaryFile",    0));
   OptMap.insert(std::make_pair("Bgo/Connector", 1));
-  /*
   OptMap.insert(std::make_pair("Psd/Connector", 4));
   OptMap.insert(std::make_pair("Stk/Connector", 5));
   OptMap.insert(std::make_pair("Nud/Connector", 7));
-  */
   OptMap.insert(std::make_pair("PackageNumber", 8));
 }
 
 //-------------------------------------------------------------------
 DmpRdcAlgBT2012::~DmpRdcAlgBT2012(){
-  delete[] fTmpTime;
-  fFile.close();
-  fOutError.close();
 }
 
 //-------------------------------------------------------------------
@@ -54,7 +51,6 @@ void DmpRdcAlgBT2012::Set(const std::string &type, const std::string &argv){
       fCNCTPathBgo = prefix+argv;
       break;
     }
-    /*
     case 4:
     {// Psd/Connector
       fCNCTPathPsd = prefix+argv;
@@ -70,7 +66,6 @@ void DmpRdcAlgBT2012::Set(const std::string &type, const std::string &argv){
       fCNCTPathNud = prefix+argv;
       break;
     }
-    */
     case 8: // PackageNumber
     {
       fMaxPkgNo = boost::lexical_cast<long>(argv);
@@ -86,7 +81,7 @@ bool DmpRdcAlgBT2012::Initialize(){
     DmpLogError<<"Open "<<fInDataName<<" failed"<<DmpLogEndl;
     return false;
   }else{
-    std::string name = "Exception_"+fInDataName.filename().string();
+    std::string name = "Error_"+fInDataName.filename().string();
     DmpLogInfo<<"Reading "<<fInDataName.string()<<"\tError data in "<<name<<DmpLogEndl;
     fOutError.open(name.c_str(),std::ios::out|std::ios::binary);
   }
@@ -108,17 +103,18 @@ bool DmpRdcAlgBT2012::ProcessThisEvent(){
       gCore->TerminateRun();
       return false;
     }
-std::cout<<"DEBUG: "<<__FILE__<<"("<<__LINE__<<"), in "<<__PRETTY_FUNCTION__<<std::endl;
   }
   bool header = ProcessThisEventHeader();
   bool bgo = ProcessThisEventBgo();
 std::cout<<"DEBUG: "<<__FILE__<<"("<<__LINE__<<"), in "<<__PRETTY_FUNCTION__<<std::endl;
-  //return (header && bgo);
-  return true;
+  return (header && bgo);
+  //return true;
 }
 
 //-------------------------------------------------------------------
 bool DmpRdcAlgBT2012::Finalize(){
+  fFile.close();
+  fOutError.close();
   return true;
 }
 
@@ -127,7 +123,6 @@ bool DmpRdcAlgBT2012::ProcessThisEventHeader(){
   fEvtHeader->Reset();
   fEvtHeader->SetPackageID((short)(unsigned char)fHeaderBuf[0].PacketID[1]);
   fEvtHeader->SetTime(&fHeaderBuf[0].Time[2]);
-  std::cout<<"DEBUG: "<<__FILE__<<"("<<__LINE__<<"), in "<<__PRETTY_FUNCTION__<<"\tpID = "<<fEvtHeader->GetPackageID()<<"\t t = "<<fEvtHeader->GetSecond()<<"\t"<<fEvtHeader->GetMillisecond()<<std::endl;
   fHeaderBuf.erase(fHeaderBuf.begin());
   return true;
 }
