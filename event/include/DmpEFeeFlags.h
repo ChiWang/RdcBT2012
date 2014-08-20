@@ -5,7 +5,7 @@
 */
 
 #ifndef DmpEFeeFlags_H
-#define DmpEFeeFlasg_H
+#define DmpEFeeFlags_H
 
 //-------------------------------------------------------------------
 namespace DmpEPackageFlag{
